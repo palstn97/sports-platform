@@ -1,6 +1,8 @@
-package com.sportsai.sports_platform.domain.user;
+package com.sportsai.sports_platform.domain.user.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
@@ -9,6 +11,8 @@ import java.time.LocalDateTime;
 @Table(name = "users")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User {
 
     @Id
@@ -25,6 +29,7 @@ public class User {
     private String nickname;
 
     @Column(nullable = false, length = 20)
+    @Builder.Default
     private String subscriptionStatus = "FREE";
 
     @Column(nullable = false)
