@@ -1,7 +1,7 @@
 package com.sportsai.sports_platform.domain.prediction;
 
 import com.sportsai.sports_platform.domain.match.Match;
-import com.sportsai.sports_platform.domain.user.User;
+import com.sportsai.sports_platform.domain.user.entity.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
