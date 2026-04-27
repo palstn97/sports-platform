@@ -3,14 +3,14 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useUserStore } from '../../store/useUserStore';
 
-export default function SignupPage() {
+export default function LoginPage() {
   const router = useRouter();
+  const { setUser } = useUserStore();
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    passwordConfirm: '',
-    nickname: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,30 +22,27 @@ export default function SignupPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-
-    if (formData.password !== formData.passwordConfirm) {
-      setError('비밀번호가 일치하지 않습니다.');
-      return;
-    }
-
     setLoading(true);
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/signup`, {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
           password: formData.password,
-          nickname: formData.nickname,
         }),
       });
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.message || '회원가입에 실패했습니다.');
+        throw new Error(data.message || '로그인에 실패했습니다.');
       }
 
-      router.push('/login');
+      const data = await res.json();
+      localStorage.setItem('accessToken', data.accessToken);
+      setUser(data.nickname, data.email, data.accessToken);
+      router.push('/');
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -67,12 +64,10 @@ export default function SignupPage() {
 
         {/* 카드 */}
         <div className="bg-white rounded-2xl border border-[#eef0f6] shadow-[0_4px_24px_rgba(0,0,0,.06)] p-8">
-          <h1 className="text-[22px] font-bold text-[#1a1f36] mb-1">회원가입</h1>
-          <p className="text-[13px] text-[#a0a8c0] mb-6">무료로 시작하고 AI 스포츠 예측을 경험해보세요</p>
+          <h1 className="text-[22px] font-bold text-[#1a1f36] mb-1">로그인</h1>
+          <p className="text-[13px] text-[#a0a8c0] mb-6">계정에 로그인하고 예측을 시작해보세요</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-            {/* 이메일 */}
             <div>
               <label className="block text-[13px] font-semibold text-[#1a1f36] mb-1.5">이메일</label>
               <input
@@ -86,21 +81,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* 닉네임 */}
-            <div>
-              <label className="block text-[13px] font-semibold text-[#1a1f36] mb-1.5">닉네임</label>
-              <input
-                type="text"
-                name="nickname"
-                value={formData.nickname}
-                onChange={handleChange}
-                placeholder="사용할 닉네임을 입력해주세요"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-[#c8cfe0] text-[14px] text-[#1a1f36] placeholder-[#a0a8c0] focus:outline-none focus:border-[#1a56db] focus:ring-2 focus:ring-[#1a56db]/10 transition-all"
-              />
-            </div>
-
-            {/* 비밀번호 */}
             <div>
               <label className="block text-[13px] font-semibold text-[#1a1f36] mb-1.5">비밀번호</label>
               <input
@@ -114,42 +94,25 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* 비밀번호 확인 */}
-            <div>
-              <label className="block text-[13px] font-semibold text-[#1a1f36] mb-1.5">비밀번호 확인</label>
-              <input
-                type="password"
-                name="passwordConfirm"
-                value={formData.passwordConfirm}
-                onChange={handleChange}
-                placeholder="비밀번호를 다시 입력해주세요"
-                required
-                className="w-full px-4 py-3 rounded-xl border border-[#c8cfe0] text-[14px] text-[#1a1f36] placeholder-[#a0a8c0] focus:outline-none focus:border-[#1a56db] focus:ring-2 focus:ring-[#1a56db]/10 transition-all"
-              />
-            </div>
-
-            {/* 에러 메시지 */}
             {error && (
               <div className="bg-[#fff1f2] text-[#e11d48] text-[13px] font-medium px-4 py-3 rounded-xl border border-[#fecdd3]">
                 {error}
               </div>
             )}
 
-            {/* 회원가입 버튼 */}
             <button
               type="submit"
               disabled={loading}
               className="w-full py-3 rounded-full text-[15px] font-bold text-white bg-gradient-to-r from-[#1a56db] to-[#3b82f6] hover:shadow-[0_8px_24px_rgba(26,86,219,.3)] hover:-translate-y-0.5 active:translate-y-0 transition-all disabled:opacity-60 disabled:cursor-not-allowed mt-2"
             >
-              {loading ? '가입 중...' : '회원가입'}
+              {loading ? '로그인 중...' : '로그인'}
             </button>
           </form>
 
-          {/* 로그인 링크 */}
           <p className="text-center text-[13px] text-[#a0a8c0] mt-6">
-            이미 계정이 있으신가요?{' '}
-            <Link href="/login" className="text-[#1a56db] font-semibold hover:underline">
-              로그인
+            아직 계정이 없으신가요?{' '}
+            <Link href="/signup" className="text-[#1a56db] font-semibold hover:underline">
+              회원가입
             </Link>
           </p>
         </div>
