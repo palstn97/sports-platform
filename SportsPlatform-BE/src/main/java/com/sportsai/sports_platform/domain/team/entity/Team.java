@@ -1,18 +1,22 @@
-package com.sportsai.sports_platform.domain.team;
+package com.sportsai.sports_platform.domain.team.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Table(name = "teams")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Team {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
+    private Long externalId;
 
     @Column(nullable = false, length = 100)
     private String name;
