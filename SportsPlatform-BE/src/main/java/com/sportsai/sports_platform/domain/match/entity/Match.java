@@ -1,20 +1,24 @@
 package com.sportsai.sports_platform.domain.match.entity;
 
-import com.sportsai.sports_platform.domain.team.Team;
+import com.sportsai.sports_platform.domain.team.entity.Team;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "matches")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Match {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
+    private Long externalId;
 
     @Column(nullable = false, length = 20)
     private String sportType;
