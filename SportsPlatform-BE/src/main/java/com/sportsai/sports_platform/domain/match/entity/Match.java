@@ -1,4 +1,4 @@
-package com.sportsai.sports_platform.domain.match;
+package com.sportsai.sports_platform.domain.match.entity;
 
 import com.sportsai.sports_platform.domain.team.Team;
 import jakarta.persistence.*;

@@ -1,6 +1,6 @@
 package com.sportsai.sports_platform.domain.analysis;
 
-import com.sportsai.sports_platform.domain.match.Match;
+import com.sportsai.sports_platform.domain.match.entity.Match;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
