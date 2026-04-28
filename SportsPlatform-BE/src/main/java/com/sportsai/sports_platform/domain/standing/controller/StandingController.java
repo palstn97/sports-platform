@@ -1,6 +1,6 @@
 package com.sportsai.sports_platform.domain.standing.controller;
 
-import com.sportsai.sports_platform.domain.standing.entity.Standing;
+import com.sportsai.sports_platform.domain.standing.dto.StandingResponseDto;
 import com.sportsai.sports_platform.domain.standing.service.StandingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +17,11 @@ public class StandingController {
 
     // 특정 리그 순위 조회
     @GetMapping("/{competitionCode}")
-    public ResponseEntity<List<Standing>> getStandings(@PathVariable String competitionCode) {
+    public ResponseEntity<List<StandingResponseDto>> getStandings(@PathVariable String competitionCode) {
         return ResponseEntity.ok(standingService.getStandings(competitionCode));
     }
 
-    // 수동으로 순위 데이터 가져오기 (테스트용)
+    // 수동으로 순위 데이터 가져오기
     @PostMapping("/fetch/{competitionCode}")
     public ResponseEntity<String> fetchStandings(@PathVariable String competitionCode) {
         standingService.fetchAndSaveStandings(competitionCode);

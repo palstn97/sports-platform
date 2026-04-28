@@ -5,6 +5,7 @@ import com.sportsai.sports_platform.domain.standing.entity.Standing;
 import com.sportsai.sports_platform.domain.standing.repository.StandingRepository;
 import com.sportsai.sports_platform.domain.team.entity.Team;
 import com.sportsai.sports_platform.domain.team.repository.TeamRepository;
+import com.sportsai.sports_platform.domain.standing.dto.StandingResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -94,7 +96,11 @@ public class StandingService {
     }
 
     // 특정 리그 순위 조회
-    public List<Standing> getStandings(String competitionCode) {
-        return standingRepository.findByCompetitionCodeOrderByPositionAsc(competitionCode);
+    public List<StandingResponseDto> getStandings(String competitionCode) {
+        return standingRepository.findByCompetitionCodeOrderByPositionAsc(competitionCode)
+                .stream()
+                .map(StandingResponseDto::from)
+                .collect(Collectors.toList());
     }
+
 }

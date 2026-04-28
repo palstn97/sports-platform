@@ -1,6 +1,7 @@
 package com.sportsai.sports_platform.domain.match.service;
 
 import com.sportsai.sports_platform.domain.match.client.FootballApiClient;
+import com.sportsai.sports_platform.domain.match.dto.MatchResponseDto;
 import com.sportsai.sports_platform.domain.match.entity.Match;
 import com.sportsai.sports_platform.domain.match.repository.MatchRepository;
 import com.sportsai.sports_platform.domain.team.entity.Team;
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -108,14 +110,20 @@ public class MatchService {
                 ));
     }
 
-    // 저장된 경기 조회
-    public List<Match> getMatchesByLeague(String league) {
-        return matchRepository.findByLeagueOrderByScheduledAtAsc(league);
+    // 저장된 경기 조회 - DTO 반환
+    public List<MatchResponseDto> getMatchesByLeague(String league) {
+        return matchRepository.findByLeagueOrderByScheduledAtAsc(league)
+                .stream()
+                .map(MatchResponseDto::from)
+                .collect(Collectors.toList());
     }
 
-    public List<Match> getTodayMatches() {
+    public List<MatchResponseDto> getTodayMatches() {
         LocalDateTime start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
         LocalDateTime end = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
-        return matchRepository.findByScheduledAtBetween(start, end);
+        return matchRepository.findByScheduledAtBetween(start, end)
+                .stream()
+                .map(MatchResponseDto::from)
+                .collect(Collectors.toList());
     }
 }
