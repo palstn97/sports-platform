@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useUserStore } from '../store/useUserStore';
+import { useUserStore } from '../../store/useUserStore';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 
