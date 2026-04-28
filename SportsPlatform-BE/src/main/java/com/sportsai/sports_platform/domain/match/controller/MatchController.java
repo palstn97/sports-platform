@@ -25,6 +25,14 @@ public class MatchController {
         return ResponseEntity.ok(matchService.getTodayMatches());
     }
 
+    // 날짜별 경기 조회
+    @GetMapping
+    public ResponseEntity<List<MatchResponseDto>> getMatchesByDate(
+            @RequestParam String date
+    ) {
+        return ResponseEntity.ok(matchService.getMatchesByDate(date));
+    }
+
     // 특정 리그 경기 조회
     @GetMapping("/league/{league}")
     public ResponseEntity<List<MatchResponseDto>> getMatchesByLeague(@PathVariable String league) {

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -126,4 +127,15 @@ public class MatchService {
                 .map(MatchResponseDto::from)
                 .collect(Collectors.toList());
     }
+
+    public List<MatchResponseDto> getMatchesByDate(String date) {
+        LocalDate localDate = LocalDate.parse(date);
+        LocalDateTime start = localDate.atStartOfDay();
+        LocalDateTime end = localDate.atTime(23, 59, 59);
+        return matchRepository.findByScheduledAtBetween(start, end)
+                .stream()
+                .map(MatchResponseDto::from)
+                .collect(Collectors.toList());
+    }
+
 }
