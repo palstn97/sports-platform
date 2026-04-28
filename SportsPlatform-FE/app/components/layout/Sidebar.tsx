@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 const navItems = [
   { label: '홈', href: '/', section: 'menu' },
@@ -24,8 +24,13 @@ const sectionLabels: Record<string, string> = {
 };
 
 export default function Sidebar() {
-  const [activeNav, setActiveNav] = useState('홈');
+  const pathname = usePathname();
   const sections = ['menu', 'predict', 'sports', 'community'];
+
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    return pathname.startsWith(href);
+  };
 
   return (
     <aside className="w-[220px] min-w-[220px] bg-white rounded-xl border border-[#eef0f6] self-start sticky top-[88px]">
@@ -41,20 +46,19 @@ export default function Sidebar() {
                 <Link
                   key={item.label}
                   href={item.href}
-                  onClick={() => setActiveNav(item.label)}
                   className={`flex items-center gap-3 px-3 py-[9px] rounded-lg text-[13px] transition-all relative mb-[2px]
-                    ${activeNav === item.label
+                    ${isActive(item.href)
                       ? 'bg-[#f0f4ff] text-[#1a56db] font-semibold'
                       : 'text-[#5a6282] font-medium hover:bg-[#f7f8fc] hover:text-[#1a1f36]'
                     }`}
                 >
-                  {activeNav === item.label && (
+                  {isActive(item.href) && (
                     <div className="absolute left-0 top-1 bottom-1 w-[3px] bg-[#1a56db] rounded-r-sm" />
                   )}
                   <div
                     className="w-[7px] h-[7px] rounded-full flex-shrink-0"
                     style={{
-                      background: activeNav === item.label
+                      background: isActive(item.href)
                         ? (item.color || '#1a56db')
                         : '#e2e6f0'
                     }}
