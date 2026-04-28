@@ -28,8 +28,13 @@ const statusLabel: Record<string, { label: string; color: string }> = {
 };
 
 const formatTime = (scheduledAt: string) => {
-  const date = new Date(scheduledAt);
-  return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const date = new Date(scheduledAt + 'Z');
+  return date.toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZone: 'Asia/Seoul'
+  });
 };
 
 interface MatchCardProps {

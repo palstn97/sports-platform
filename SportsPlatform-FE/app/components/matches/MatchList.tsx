@@ -35,7 +35,7 @@ export default function MatchList() {
     const fetchMatches = async () => {
       setLoading(true);
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/matches/today`);
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/matches?date=${selectedDate}`);
         const data = await res.json();
         setMatches(data);
       } catch (err) {
