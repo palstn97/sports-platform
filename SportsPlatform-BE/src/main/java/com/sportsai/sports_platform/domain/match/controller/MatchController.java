@@ -1,8 +1,8 @@
 package com.sportsai.sports_platform.domain.match.controller;
 
-import com.sportsai.sports_platform.domain.match.entity.Match;
-import com.sportsai.sports_platform.domain.match.service.MatchService;
+import com.sportsai.sports_platform.domain.match.dto.MatchResponseDto;
 import com.sportsai.sports_platform.domain.match.scheduler.MatchScheduler;
+import com.sportsai.sports_platform.domain.match.service.MatchService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,13 +21,13 @@ public class MatchController {
 
     // 오늘 경기 조회
     @GetMapping("/today")
-    public ResponseEntity<List<Match>> getTodayMatches() {
+    public ResponseEntity<List<MatchResponseDto>> getTodayMatches() {
         return ResponseEntity.ok(matchService.getTodayMatches());
     }
 
     // 특정 리그 경기 조회
     @GetMapping("/league/{league}")
-    public ResponseEntity<List<Match>> getMatchesByLeague(@PathVariable String league) {
+    public ResponseEntity<List<MatchResponseDto>> getMatchesByLeague(@PathVariable String league) {
         return ResponseEntity.ok(matchService.getMatchesByLeague(league));
     }
 
@@ -51,10 +51,10 @@ public class MatchController {
         return ResponseEntity.ok("전체 리그 경기 데이터를 가져왔습니다.");
     }
 
-    // 이번 시즌 전체 데이터 한 번에 가져오기 (과거 + 미래)
+    // 이번 시즌 전체 데이터 한 번에 가져오기
     @PostMapping("/fetch-season")
     public ResponseEntity<String> fetchSeasonMatches() {
-        String dateFrom = "2025-07-01";  // 시즌 시작
+        String dateFrom = "2025-07-01";
         String dateTo = LocalDate.now().plusDays(7).format(DateTimeFormatter.ISO_DATE);
         matchScheduler.fetchMatchesForAllLeagues(dateFrom, dateTo);
         return ResponseEntity.ok("이번 시즌 전체 경기 데이터를 가져왔습니다.");
