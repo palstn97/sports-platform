@@ -16,6 +16,7 @@ public class CorsConfig {
 
         config.setAllowCredentials(true);
         config.addAllowedOrigin("http://localhost:3000");
+        config.addAllowedOrigin("https://sports-platform-five.vercel.app");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
