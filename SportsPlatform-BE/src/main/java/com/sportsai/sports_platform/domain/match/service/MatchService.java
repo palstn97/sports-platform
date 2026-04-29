@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -120,8 +121,9 @@ public class MatchService {
     }
 
     public List<MatchResponseDto> getTodayMatches() {
-        LocalDateTime start = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0);
-        LocalDateTime end = LocalDateTime.now().withHour(23).withMinute(59).withSecond(59);
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        LocalDateTime start = today.atStartOfDay().minusHours(9);
+        LocalDateTime end = today.atTime(23, 59, 59).minusHours(9);
         return matchRepository.findByScheduledAtBetween(start, end)
                 .stream()
                 .map(MatchResponseDto::from)
@@ -130,8 +132,9 @@ public class MatchService {
 
     public List<MatchResponseDto> getMatchesByDate(String date) {
         LocalDate localDate = LocalDate.parse(date);
-        LocalDateTime start = localDate.atStartOfDay();
-        LocalDateTime end = localDate.atTime(23, 59, 59);
+        // KST(+9)를 UTC로 변환: KST 00:00 = UTC 전날 15:00
+        LocalDateTime start = localDate.atStartOfDay().minusHours(9);
+        LocalDateTime end = localDate.atTime(23, 59, 59).minusHours(9);
         return matchRepository.findByScheduledAtBetween(start, end)
                 .stream()
                 .map(MatchResponseDto::from)
