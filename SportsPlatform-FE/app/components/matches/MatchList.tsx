@@ -22,7 +22,10 @@ interface MatchResponseDto {
   awayScore: number | null;
 }
 
-const formatDate = (date: Date) => date.toISOString().split('T')[0];
+const formatDate = (date: Date) => {
+  const kst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+  return kst.toISOString().split('T')[0];
+};
 
 export default function MatchList() {
   const [selectedDate, setSelectedDate] = useState(formatDate(new Date()));
@@ -47,12 +50,10 @@ export default function MatchList() {
     fetchMatches();
   }, [selectedDate]);
 
-  // 리그 필터링
   const filteredMatches = selectedLeague === 'all'
     ? matches
     : matches.filter(m => m.league === selectedLeague);
 
-  // 리그별 그룹핑
   const groupedMatches = filteredMatches.reduce((acc, match) => {
     if (!acc[match.league]) acc[match.league] = [];
     acc[match.league].push(match);
@@ -61,19 +62,14 @@ export default function MatchList() {
 
   return (
     <div className="flex-1">
-
-      {/* 날짜 탭 */}
       <DateTabs
         selectedDate={selectedDate}
         onDateSelect={setSelectedDate}
         weekOffset={weekOffset}
         onWeekChange={setWeekOffset}
       />
-
-      {/* 리그 필터 */}
       <LeagueFilter selectedLeague={selectedLeague} onLeagueSelect={setSelectedLeague} />
 
-      {/* 경기 목록 */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
           <div className="text-[14px] text-[#a0a8c0]">경기 데이터를 불러오는 중...</div>
@@ -87,13 +83,10 @@ export default function MatchList() {
       ) : (
         Object.entries(groupedMatches).map(([league, leagueMatches]) => (
           <div key={league} className="mb-4">
-            {/* 리그 헤더 */}
             <div className="bg-white border border-[#eef0f6] rounded-t-xl px-4 py-3 flex items-center gap-2">
               <span className="text-[13px] font-bold text-[#1a1f36]">{league}</span>
               <span className="text-[11px] text-[#a0a8c0] ml-auto">{leagueMatches.length}경기</span>
             </div>
-
-            {/* 경기 카드 */}
             {leagueMatches.map((match, i) => (
               <MatchCard
                 key={match.id}
