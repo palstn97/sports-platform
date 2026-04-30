@@ -1,16 +1,17 @@
-package com.sportsai.sports_platform.domain.prediction;
+package com.sportsai.sports_platform.domain.prediction.entity;
 
 import com.sportsai.sports_platform.domain.match.entity.Match;
 import com.sportsai.sports_platform.domain.user.entity.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "predictions")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Prediction {
 
     @Id
