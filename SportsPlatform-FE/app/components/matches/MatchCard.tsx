@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 interface TeamDto {
   id: number;
   name: string;
@@ -48,59 +50,61 @@ export default function MatchCard({ match, isLast }: MatchCardProps) {
   const isFinished = match.status === 'FINISHED';
 
   return (
-    <div
-      className={`bg-white border border-[#eef0f6] border-t-0 hover:bg-[#f7f8fc] transition-all cursor-pointer
-        ${isLast ? 'rounded-b-xl' : ''}`}
-    >
-      <div className="flex items-center px-4 py-3 gap-4">
+    <Link href={`/matches/${match.id}`}>
+      <div
+        className={`bg-white border border-[#eef0f6] border-t-0 hover:bg-[#f7f8fc] transition-all cursor-pointer
+          ${isLast ? 'rounded-b-xl' : ''}`}
+      >
+        <div className="flex items-center px-4 py-3 gap-4">
 
-        {/* 시간/상태 */}
-        <div className="w-[60px] flex flex-col items-center flex-shrink-0">
-          <span className="text-[12px] font-semibold text-[#5a6282]">
-            {formatTime(match.scheduledAt)}
-          </span>
-          <span
-            className="text-[10px] font-semibold mt-1 flex items-center gap-1"
-            style={{ color: status.color }}
-          >
-            {isLive && (
-              <span className="inline-block w-[5px] h-[5px] rounded-full bg-[#e11d48] animate-pulse" />
-            )}
-            {status.label}
-          </span>
-        </div>
-
-        {/* 홈팀 */}
-        <div className="flex-1 flex items-center gap-2 justify-end">
-          <span className={`text-[13px] font-semibold ${isFinished && match.homeScore! > match.awayScore! ? 'text-[#1a56db]' : 'text-[#1a1f36]'}`}>
-            {match.homeTeam.name}
-          </span>
-          {match.homeTeam.logoUrl && (
-            <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} className="w-7 h-7 object-contain" />
-          )}
-        </div>
-
-        {/* 스코어 */}
-        <div className="w-[60px] flex items-center justify-center">
-          {isFinished || isLive ? (
-            <span className="text-[18px] font-bold text-[#1a1f36]">
-              {match.homeScore ?? 0} - {match.awayScore ?? 0}
+          {/* 시간/상태 */}
+          <div className="w-[60px] flex flex-col items-center flex-shrink-0">
+            <span className="text-[12px] font-semibold text-[#5a6282]">
+              {formatTime(match.scheduledAt)}
             </span>
-          ) : (
-            <span className="text-[13px] font-semibold text-[#c8cfe0]">vs</span>
-          )}
-        </div>
+            <span
+              className="text-[10px] font-semibold mt-1 flex items-center gap-1"
+              style={{ color: status.color }}
+            >
+              {isLive && (
+                <span className="inline-block w-[5px] h-[5px] rounded-full bg-[#e11d48] animate-pulse" />
+              )}
+              {status.label}
+            </span>
+          </div>
 
-        {/* 원정팀 */}
-        <div className="flex-1 flex items-center gap-2">
-          {match.awayTeam.logoUrl && (
-            <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} className="w-7 h-7 object-contain" />
-          )}
-          <span className={`text-[13px] font-semibold ${isFinished && match.awayScore! > match.homeScore! ? 'text-[#1a56db]' : 'text-[#1a1f36]'}`}>
-            {match.awayTeam.name}
-          </span>
+          {/* 홈팀 */}
+          <div className="flex-1 flex items-center gap-2 justify-end">
+            <span className={`text-[13px] font-semibold ${isFinished && match.homeScore! > match.awayScore! ? 'text-[#1a56db]' : 'text-[#1a1f36]'}`}>
+              {match.homeTeam.name}
+            </span>
+            {match.homeTeam.logoUrl && (
+              <img src={match.homeTeam.logoUrl} alt={match.homeTeam.name} className="w-7 h-7 object-contain" />
+            )}
+          </div>
+
+          {/* 스코어 */}
+          <div className="w-[60px] flex items-center justify-center">
+            {isFinished || isLive ? (
+              <span className="text-[18px] font-bold text-[#1a1f36]">
+                {match.homeScore ?? 0} - {match.awayScore ?? 0}
+              </span>
+            ) : (
+              <span className="text-[13px] font-semibold text-[#c8cfe0]">vs</span>
+            )}
+          </div>
+
+          {/* 원정팀 */}
+          <div className="flex-1 flex items-center gap-2">
+            {match.awayTeam.logoUrl && (
+              <img src={match.awayTeam.logoUrl} alt={match.awayTeam.name} className="w-7 h-7 object-contain" />
+            )}
+            <span className={`text-[13px] font-semibold ${isFinished && match.awayScore! > match.homeScore! ? 'text-[#1a56db]' : 'text-[#1a1f36]'}`}>
+              {match.awayTeam.name}
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 }
