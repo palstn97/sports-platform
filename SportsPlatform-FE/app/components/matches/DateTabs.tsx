@@ -1,9 +1,11 @@
 'use client';
 
-const formatDate = (date: Date) => date.toISOString().split('T')[0];
+const toKST = (date: Date) => new Date(date.getTime() + 9 * 60 * 60 * 1000);
+const formatDate = (date: Date) => toKST(date).toISOString().split('T')[0];
 const formatDay = (date: Date) => {
+  const kst = toKST(date);
   const days = ['일', '월', '화', '수', '목', '금', '토'];
-  return days[date.getDay()];
+  return days[kst.getDay()];
 };
 const isToday = (date: Date) => formatDate(date) === formatDate(new Date());
 
@@ -16,9 +18,13 @@ interface DateTabsProps {
 
 const generateWeekDates = (weekOffset: number) => {
   const dates = [];
+  const now = new Date();
+  const kstNow = toKST(now);
+  const kstMidnight = new Date(kstNow);
+  kstMidnight.setHours(0, 0, 0, 0);
+
   for (let i = 0; i < 7; i++) {
-    const date = new Date();
-    date.setDate(date.getDate() + weekOffset * 7 + i);
+    const date = new Date(kstMidnight.getTime() + (weekOffset * 7 + i) * 24 * 60 * 60 * 1000);
     dates.push(date);
   }
   return dates;
@@ -29,8 +35,6 @@ export default function DateTabs({ selectedDate, onDateSelect, weekOffset, onWee
 
   return (
     <div className="bg-white rounded-xl border border-[#eef0f6] p-2 flex items-center gap-1 mb-4">
-
-      {/* 이전 주 버튼 */}
       <button
         onClick={() => onWeekChange(weekOffset - 1)}
         className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#f4f6fb] transition-all flex-shrink-0 text-[#a0a8c0] hover:text-[#1a56db]"
@@ -40,7 +44,6 @@ export default function DateTabs({ selectedDate, onDateSelect, weekOffset, onWee
         </svg>
       </button>
 
-      {/* 날짜 탭 */}
       {dates.map((date) => (
         <button
           key={formatDate(date)}
@@ -52,7 +55,7 @@ export default function DateTabs({ selectedDate, onDateSelect, weekOffset, onWee
             }`}
         >
           <div className={`text-[13px] font-bold ${selectedDate === formatDate(date) ? 'text-white' : 'text-[#1a1f36]'}`}>
-            {date.getMonth() + 1}/{date.getDate()}
+            {toKST(date).getMonth() + 1}/{toKST(date).getDate()}
           </div>
           {isToday(date) ? (
             <div className={`text-[10px] font-bold mt-1 ${selectedDate === formatDate(date) ? 'text-blue-200' : 'text-[#1a56db]'}`}>
@@ -66,7 +69,6 @@ export default function DateTabs({ selectedDate, onDateSelect, weekOffset, onWee
         </button>
       ))}
 
-      {/* 다음 주 버튼 */}
       <button
         onClick={() => onWeekChange(weekOffset + 1)}
         className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-[#f4f6fb] transition-all flex-shrink-0 text-[#a0a8c0] hover:text-[#1a56db]"
