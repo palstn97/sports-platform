@@ -25,8 +25,8 @@ public class MatchScheduler {
             "CL"    // 챔피언스리그
     };
 
-    // 매일 오전 6시 - 7일치 경기 일정 업데이트
-    @Scheduled(cron = "0 0 6 * * *")
+    // 2시간 마다 - 7일치 경기 일정 업데이트
+    @Scheduled(cron = "0 0 */2 * * *")
     public void fetchUpcomingMatches() {
         log.info("경기 일정 업데이트 시작");
         String dateFrom = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
@@ -35,8 +35,8 @@ public class MatchScheduler {
         log.info("경기 일정 업데이트 완료");
     }
 
-    // 매 5분마다 - 라이브 스코어 업데이트
-    @Scheduled(fixedRate = 300000)
+    // 매 5분마다 - 라이브 스코어 업데이트 -> 이 부분은 유료 플랜을 사용하지 않아서 의미가 없는 코드. 그렇기에 나중에 추후 확장할 시 주석 해제 후 진행하면 라이브 스코어 제공 가능
+//    @Scheduled(fixedRate = 300000)
     public void updateLiveScores() {
         log.info("라이브 스코어 업데이트 시작");
         String today = LocalDate.now().format(DateTimeFormatter.ISO_DATE);
