@@ -141,4 +141,10 @@ public class MatchService {
                 .collect(Collectors.toList());
     }
 
+    public MatchResponseDto getMatchById(Long id) {
+        Match match = matchRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("경기를 찾을 수 없습니다."));
+        return MatchResponseDto.from(match);
+    }
+
 }

@@ -67,4 +67,10 @@ public class MatchController {
         matchScheduler.fetchMatchesForAllLeagues(dateFrom, dateTo);
         return ResponseEntity.ok("이번 시즌 전체 경기 데이터를 가져왔습니다.");
     }
+
+    // 경기 상세 조회
+    @GetMapping("/{id}")
+    public ResponseEntity<MatchResponseDto> getMatchById(@PathVariable Long id) {
+        return ResponseEntity.ok(matchService.getMatchById(id));
+    }
 }
