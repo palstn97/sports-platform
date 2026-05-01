@@ -84,4 +84,16 @@ public class PredictionService {
 
         return new PredictionRatioDto(homeRatio, drawRatio, awayRatio, total, myPrediction);
     }
+
+    @Transactional
+    public void deletePrediction(Long matchId, String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
+
+        Prediction prediction = predictionRepository
+                .findByUserIdAndMatchId(user.getId(), matchId)
+                .orElseThrow(() -> new IllegalArgumentException("예측을 찾을 수 없습니다."));
+
+        predictionRepository.delete(prediction);
+    }
 }
