@@ -6,8 +6,9 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class PredictionRatioDto {
-    private double homeRatio;   // 홈팀 승 %
-    private double drawRatio;   // 무승부 %
-    private double awayRatio;   // 원정팀 승 %
-    private long totalCount;    // 전체 예측 수
+    private double homeRatio;
+    private double drawRatio;
+    private double awayRatio;
+    private long totalCount;
+    private String myPrediction; // HOME, DRAW, AWAY 또는 null
 }

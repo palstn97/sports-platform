@@ -22,7 +22,6 @@ public class PredictionService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
 
-    // 예측 저장
     @Transactional
     public void savePrediction(String email, PredictionRequestDto dto) {
         User user = userRepository.findByEmail(email);
@@ -43,16 +42,28 @@ public class PredictionService {
         predictionRepository.save(prediction);
     }
 
-    // 경기별 예측 비율 조회
+    // 로그인 사용자 비율 조회 (내 예측 포함)
     public PredictionRatioDto getRatio(Long matchId, String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
 
-        boolean hasPredicted = predictionRepository
-                .findByUserIdAndMatchId(user.getId(), matchId).isPresent();
+        String myPrediction = predictionRepository
+                .findByUserIdAndMatchId(user.getId(), matchId)
+                .map(p -> p.getPredictedResult())
+                .orElse(null);
 
-        if (!hasPredicted) return null;
+        if (myPrediction == null) return null;
 
+        return calculateRatio(matchId, myPrediction);
+    }
+
+    // 공개 비율 조회 (종료된 경기용)
+    public PredictionRatioDto getPublicRatio(Long matchId) {
+        return calculateRatio(matchId, null);
+    }
+
+    // 비율 계산 공통 메서드
+    private PredictionRatioDto calculateRatio(Long matchId, String myPrediction) {
         List<Object[]> results = predictionRepository.countByMatchIdGroupByResult(matchId);
 
         long home = 0, draw = 0, away = 0;
@@ -65,12 +76,12 @@ public class PredictionService {
         }
 
         long total = home + draw + away;
-        if (total == 0) return new PredictionRatioDto(0, 0, 0, 0);
+        if (total == 0) return new PredictionRatioDto(0, 0, 0, 0, myPrediction);
 
         double homeRatio = Math.round((double) home / total * 1000) / 10.0;
         double drawRatio = Math.round((double) draw / total * 1000) / 10.0;
         double awayRatio = Math.round(1000 - homeRatio * 10 - drawRatio * 10) / 10.0;
 
-        return new PredictionRatioDto(homeRatio, drawRatio, awayRatio, total);
+        return new PredictionRatioDto(homeRatio, drawRatio, awayRatio, total, myPrediction);
     }
 }
