@@ -45,4 +45,15 @@ public class PredictionController {
     public ResponseEntity<PredictionRatioDto> getPublicRatio(@PathVariable Long matchId) {
         return ResponseEntity.ok(predictionService.getPublicRatio(matchId));
     }
+
+    @DeleteMapping("/{matchId}")
+    public ResponseEntity<?> deletePrediction(
+            @PathVariable Long matchId,
+            HttpServletRequest request
+    ) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        predictionService.deletePrediction(matchId, email);
+        return ResponseEntity.ok("예측이 취소되었습니다.");
+    }
 }
