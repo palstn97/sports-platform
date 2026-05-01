@@ -29,7 +29,7 @@ public class PredictionController {
         return ResponseEntity.ok("예측이 저장되었습니다.");
     }
 
-    // 경기별 예측 비율 조회 (누구나 가능)
+    // 경기별 예측 비율 조회 (로그인 필요)
     @GetMapping("/{matchId}/ratio")
     public ResponseEntity<PredictionRatioDto> getRatio(
             @PathVariable Long matchId,
@@ -38,5 +38,11 @@ public class PredictionController {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         String email = jwtTokenProvider.getEmailFromToken(token);
         return ResponseEntity.ok(predictionService.getRatio(matchId, email));
+    }
+
+    // 종료된 경기 비율 공개 조회 (로그인 불필요)
+    @GetMapping("/{matchId}/ratio/public")
+    public ResponseEntity<PredictionRatioDto> getPublicRatio(@PathVariable Long matchId) {
+        return ResponseEntity.ok(predictionService.getPublicRatio(matchId));
     }
 }

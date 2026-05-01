@@ -36,6 +36,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/matches", "/api/matches/**").permitAll()
                         .requestMatchers("/api/standings/**").permitAll()
+                        .requestMatchers("/api/predictions/*/ratio/public").permitAll()
                         .requestMatchers("/api/predictions/**").authenticated()
                         .anyRequest().authenticated()
                 )
