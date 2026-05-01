@@ -85,6 +85,27 @@ export default function PredictionCard({ matchId, homeTeam, awayTeam, status }: 
     }
     setLoading(true);
     try {
+      // 같은 항목 누르면 취소
+      if (ratio?.myPrediction === result) {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/${matchId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (res.ok) {
+          setRatio(null);
+          setPredicted(false);
+        }
+        return;
+      }
+
+      // 다른 항목 누르면 기존 예측 삭제 후 새로 저장
+      if (ratio?.myPrediction) {
+        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions/${matchId}`, {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+      }
+
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/predictions`, {
         method: 'POST',
         headers: {
@@ -124,10 +145,10 @@ export default function PredictionCard({ matchId, homeTeam, awayTeam, status }: 
       {(isFinished || predicted) && ratio ? (
         <div>
           <div className="rounded-xl overflow-hidden h-[64px] flex gap-[2px] bg-[#f4f6fb] p-[3px]">
-            {/* 홈팀 */}
             {ratio.homeRatio > 0 && (
               <div
-                className="flex flex-col items-center justify-center gap-1 transition-all duration-500 rounded-lg"
+                onClick={() => !isFinished && handlePredict('HOME')}
+                className={`flex flex-col items-center justify-center gap-1 transition-all duration-500 rounded-lg ${!isFinished ? 'cursor-pointer hover:opacity-80' : ''}`}
                 style={{
                   width: `${ratio.homeRatio}%`,
                   backgroundColor: '#1a56db',
@@ -143,10 +164,10 @@ export default function PredictionCard({ matchId, homeTeam, awayTeam, status }: 
               </div>
             )}
 
-            {/* 무승부 */}
             {ratio.drawRatio > 0 && (
               <div
-                className="flex flex-col items-center justify-center gap-1 transition-all duration-500 rounded-lg"
+                onClick={() => !isFinished && handlePredict('DRAW')}
+                className={`flex flex-col items-center justify-center gap-1 transition-all duration-500 rounded-lg ${!isFinished ? 'cursor-pointer hover:opacity-80' : ''}`}
                 style={{
                   width: `${ratio.drawRatio}%`,
                   backgroundColor: '#6b7280',
@@ -165,10 +186,10 @@ export default function PredictionCard({ matchId, homeTeam, awayTeam, status }: 
               </div>
             )}
 
-            {/* 원정팀 */}
             {ratio.awayRatio > 0 && (
               <div
-                className="flex flex-col items-center justify-center gap-1 transition-all duration-500 rounded-lg"
+                onClick={() => !isFinished && handlePredict('AWAY')}
+                className={`flex flex-col items-center justify-center gap-1 transition-all duration-500 rounded-lg ${!isFinished ? 'cursor-pointer hover:opacity-80' : ''}`}
                 style={{
                   width: `${ratio.awayRatio}%`,
                   backgroundColor: '#e11d48',
