@@ -19,4 +19,7 @@ public interface PredictionRepository extends JpaRepository<Prediction, Long> {
     // 특정 경기의 예측 결과별 카운트 -> % 계산에 사용
     @Query("SELECT p.predictedResult, COUNT(p) FROM Prediction p WHERE p.match.id = :matchId GROUP BY p.predictedResult")
     List<Object[]> countByMatchIdGroupByResult(@Param("matchId") Long matchId);
+
+    // 유저의 예측 전체 조회
+    List<Prediction> findByUserIdOrderByPredictedAtDesc(Long userId);
 }
