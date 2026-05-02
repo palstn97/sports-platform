@@ -1,13 +1,33 @@
 'use client';
 
-const toKST = (date: Date) => new Date(date.getTime() + 9 * 60 * 60 * 1000);
-const formatDate = (date: Date) => toKST(date).toISOString().split('T')[0];
-const formatDay = (date: Date) => {
-  const kst = toKST(date);
+// ✅ 브라우저 타임존 상관없이 항상 KST 기준
+const getKSTDateString = (date: Date): string =>
+  date.toLocaleDateString('en-CA', { timeZone: 'Asia/Seoul' }); // "YYYY-MM-DD"
+
+const getKSTDay = (date: Date): string => {
   const days = ['일', '월', '화', '수', '목', '금', '토'];
-  return days[kst.getDay()];
+  const dayIndex = parseInt(
+    date.toLocaleDateString('en-US', { timeZone: 'Asia/Seoul', weekday: 'short' })
+      .replace('Sun', '0').replace('Mon', '1').replace('Tue', '2')
+      .replace('Wed', '3').replace('Thu', '4').replace('Fri', '5').replace('Sat', '6')
+  );
+  return days[dayIndex];
 };
-const isToday = (date: Date) => formatDate(date) === formatDate(new Date());
+
+const isToday = (date: Date): boolean =>
+  getKSTDateString(date) === getKSTDateString(new Date());
+
+const generateWeekDates = (weekOffset: number): Date[] => {
+  // KST 오늘 날짜 문자열 → Date 객체 (시간 없이 날짜만)
+  const todayKSTStr = getKSTDateString(new Date()); // "2026-05-02"
+  const todayUTC = new Date(todayKSTStr + 'T00:00:00Z'); // UTC 기준 날짜 객체
+
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(todayUTC);
+    d.setUTCDate(todayUTC.getUTCDate() + weekOffset * 7 + i);
+    return d;
+  });
+};
 
 interface DateTabsProps {
   selectedDate: string;
@@ -15,20 +35,6 @@ interface DateTabsProps {
   weekOffset: number;
   onWeekChange: (offset: number) => void;
 }
-
-const generateWeekDates = (weekOffset: number) => {
-  const dates = [];
-  const now = new Date();
-  const kstNow = toKST(now);
-  const kstMidnight = new Date(kstNow);
-  kstMidnight.setHours(0, 0, 0, 0);
-
-  for (let i = 0; i < 7; i++) {
-    const date = new Date(kstMidnight.getTime() + (weekOffset * 7 + i) * 24 * 60 * 60 * 1000);
-    dates.push(date);
-  }
-  return dates;
-};
 
 export default function DateTabs({ selectedDate, onDateSelect, weekOffset, onWeekChange }: DateTabsProps) {
   const dates = generateWeekDates(weekOffset);
@@ -44,30 +50,34 @@ export default function DateTabs({ selectedDate, onDateSelect, weekOffset, onWee
         </svg>
       </button>
 
-      {dates.map((date) => (
-        <button
-          key={formatDate(date)}
-          onClick={() => onDateSelect(formatDate(date))}
-          className={`flex-1 py-2 rounded-lg text-center transition-all
-            ${selectedDate === formatDate(date)
-              ? 'bg-[#1a56db] text-white'
-              : 'hover:bg-[#f4f6fb] text-[#5a6282]'
+      {dates.map((date) => {
+        const dateStr = getKSTDateString(date);
+        const isSelected = selectedDate === dateStr;
+        const [, month, day] = dateStr.split('-');
+
+        return (
+          <button
+            key={dateStr}
+            onClick={() => onDateSelect(dateStr)}
+            className={`flex-1 py-2 rounded-lg text-center transition-all ${
+              isSelected ? 'bg-[#1a56db] text-white' : 'hover:bg-[#f4f6fb] text-[#5a6282]'
             }`}
-        >
-          <div className={`text-[13px] font-bold ${selectedDate === formatDate(date) ? 'text-white' : 'text-[#1a1f36]'}`}>
-            {toKST(date).getMonth() + 1}/{toKST(date).getDate()}
-          </div>
-          {isToday(date) ? (
-            <div className={`text-[10px] font-bold mt-1 ${selectedDate === formatDate(date) ? 'text-blue-200' : 'text-[#1a56db]'}`}>
-              오늘
+          >
+            <div className={`text-[13px] font-bold ${isSelected ? 'text-white' : 'text-[#1a1f36]'}`}>
+              {parseInt(month)}/{parseInt(day)}
             </div>
-          ) : (
-            <div className={`text-[10px] mt-1 ${selectedDate === formatDate(date) ? 'text-blue-200' : 'text-[#a0a8c0]'}`}>
-              {formatDay(date)}
-            </div>
-          )}
-        </button>
-      ))}
+            {isToday(date) ? (
+              <div className={`text-[10px] font-bold mt-1 ${isSelected ? 'text-blue-200' : 'text-[#1a56db]'}`}>
+                오늘
+              </div>
+            ) : (
+              <div className={`text-[10px] mt-1 ${isSelected ? 'text-blue-200' : 'text-[#a0a8c0]'}`}>
+                {getKSTDay(date)}
+              </div>
+            )}
+          </button>
+        );
+      })}
 
       <button
         onClick={() => onWeekChange(weekOffset + 1)}
