@@ -3,11 +3,13 @@ package com.sportsai.sports_platform.domain.prediction.controller;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRatioDto;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRequestDto;
 import com.sportsai.sports_platform.domain.prediction.service.PredictionService;
+import com.sportsai.sports_platform.domain.prediction.dto.PredictionHistoryDto;
 import com.sportsai.sports_platform.common.security.JwtTokenProvider;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/predictions")
@@ -55,5 +57,13 @@ public class PredictionController {
         String email = jwtTokenProvider.getEmailFromToken(token);
         predictionService.deletePrediction(matchId, email);
         return ResponseEntity.ok("예측이 취소되었습니다.");
+    }
+
+    // 내 예측 이력 조회
+    @GetMapping("/my")
+    public ResponseEntity<List<PredictionHistoryDto>> getMyPredictions(HttpServletRequest request) {
+        String token = request.getHeader("Authorization").replace("Bearer ", "");
+        String email = jwtTokenProvider.getEmailFromToken(token);
+        return ResponseEntity.ok(predictionService.getMyPredictions(email));
     }
 }
