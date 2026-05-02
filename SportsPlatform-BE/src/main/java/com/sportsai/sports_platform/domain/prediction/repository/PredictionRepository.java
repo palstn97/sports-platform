@@ -22,4 +22,5 @@ public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
     // 유저의 예측 전체 조회
     List<Prediction> findByUserIdOrderByPredictedAtDesc(Long userId);
+
 }

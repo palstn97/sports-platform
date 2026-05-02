@@ -29,7 +29,7 @@ public class MatchScheduler {
     @Scheduled(cron = "0 0 */2 * * *")
     public void fetchUpcomingMatches() {
         log.info("경기 일정 업데이트 시작");
-        String dateFrom = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_DATE); // 어제부터
+        String dateFrom = LocalDate.now().minusDays(2).format(DateTimeFormatter.ISO_DATE);
         String dateTo = LocalDate.now().plusDays(7).format(DateTimeFormatter.ISO_DATE);
         fetchMatchesForAllLeagues(dateFrom, dateTo);
         log.info("경기 일정 업데이트 완료");

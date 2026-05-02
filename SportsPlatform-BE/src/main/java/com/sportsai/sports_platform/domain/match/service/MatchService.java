@@ -4,6 +4,8 @@ import com.sportsai.sports_platform.domain.match.client.FootballApiClient;
 import com.sportsai.sports_platform.domain.match.dto.MatchResponseDto;
 import com.sportsai.sports_platform.domain.match.entity.Match;
 import com.sportsai.sports_platform.domain.match.repository.MatchRepository;
+import com.sportsai.sports_platform.domain.prediction.entity.Prediction;
+import com.sportsai.sports_platform.domain.prediction.repository.PredictionRepository;
 import com.sportsai.sports_platform.domain.team.entity.Team;
 import com.sportsai.sports_platform.domain.team.repository.TeamRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,7 @@ public class MatchService {
     private final FootballApiClient footballApiClient;
     private final MatchRepository matchRepository;
     private final TeamRepository teamRepository;
+    private final PredictionRepository predictionRepository; // ✅ 추가
 
     @Transactional
     public void fetchAndSaveMatches(String competitionCode, String dateFrom, String dateTo) {
@@ -49,7 +52,7 @@ public class MatchService {
             Map<String, Object> competition = (Map<String, Object>) matchData.get("competition");
             String league = (String) competition.get("name");
 
-            // 이미 있으면 스코어/상태만 업데이트
+            // 이미 있으면 스코어/상태 업데이트
             Match existingMatch = matchRepository.findByExternalId(externalId).orElse(null);
             if (existingMatch != null) {
                 matchRepository.save(Match.builder()
@@ -64,6 +67,34 @@ public class MatchService {
                         .homeScore(homeScore)
                         .awayScore(awayScore)
                         .build());
+
+                // ✅ FINISHED 경기 → isCorrect 업데이트
+                if ("FINISHED".equals(status) && homeScore != null && awayScore != null) {
+                    String actualResult;
+                    if (homeScore > awayScore) actualResult = "HOME";
+                    else if (awayScore > homeScore) actualResult = "AWAY";
+                    else actualResult = "DRAW";
+
+                    final String finalResult = actualResult;
+
+                    List<Prediction> predictions = predictionRepository.findByMatchId(existingMatch.getId());
+                    for (Prediction prediction : predictions) {
+                        if (prediction.getIsCorrect() == null) {
+                            boolean correct = prediction.getPredictedResult().equals(finalResult);
+                            predictionRepository.save(Prediction.builder()
+                                    .id(prediction.getId())
+                                    .user(prediction.getUser())
+                                    .match(prediction.getMatch())
+                                    .predictedResult(prediction.getPredictedResult())
+                                    .predictedScore(prediction.getPredictedScore())
+                                    .isCorrect(correct)
+                                    .points(correct ? 10 : 0)
+                                    .predictedAt(prediction.getPredictedAt())
+                                    .build());
+                        }
+                    }
+                }
+
                 continue;
             }
 
@@ -94,7 +125,6 @@ public class MatchService {
         }
     }
 
-    // 팀 저장 또는 조회
     private Team saveOrGetTeam(Map<String, Object> teamData, String competitionCode) {
         Long externalId = Long.valueOf(teamData.get("id").toString());
         String name = (String) teamData.get("name");
@@ -112,7 +142,6 @@ public class MatchService {
                 ));
     }
 
-    // 저장된 경기 조회 - DTO 반환
     public List<MatchResponseDto> getMatchesByLeague(String league) {
         return matchRepository.findByLeagueOrderByScheduledAtAsc(league)
                 .stream()
@@ -132,7 +161,6 @@ public class MatchService {
 
     public List<MatchResponseDto> getMatchesByDate(String date) {
         LocalDate localDate = LocalDate.parse(date);
-        // KST(+9)를 UTC로 변환: KST 00:00 = UTC 전날 15:00
         LocalDateTime start = localDate.atStartOfDay().minusHours(9);
         LocalDateTime end = localDate.atTime(23, 59, 59).minusHours(9);
         return matchRepository.findByScheduledAtBetween(start, end)
@@ -146,5 +174,4 @@ public class MatchService {
                 .orElseThrow(() -> new IllegalArgumentException("경기를 찾을 수 없습니다."));
         return MatchResponseDto.from(match);
     }
-
 }
