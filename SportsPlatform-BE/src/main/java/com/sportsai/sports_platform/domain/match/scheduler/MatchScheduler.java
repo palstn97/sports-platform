@@ -26,7 +26,7 @@ public class MatchScheduler {
     };
 
     // 2시간 마다 - 7일치 경기 일정 업데이트
-    @Scheduled(cron = "0 0 */2 * * *")
+    @Scheduled(cron = "0 0 * * * *")
     public void fetchUpcomingMatches() {
         log.info("경기 일정 업데이트 시작");
         String dateFrom = LocalDate.now().minusDays(2).format(DateTimeFormatter.ISO_DATE);
