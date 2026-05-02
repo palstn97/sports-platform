@@ -2,6 +2,7 @@ package com.sportsai.sports_platform.domain.prediction.service;
 
 import com.sportsai.sports_platform.domain.match.entity.Match;
 import com.sportsai.sports_platform.domain.match.repository.MatchRepository;
+import com.sportsai.sports_platform.domain.prediction.dto.PredictionHistoryDto;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRatioDto;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRequestDto;
 import com.sportsai.sports_platform.domain.prediction.entity.Prediction;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -95,5 +97,29 @@ public class PredictionService {
                 .orElseThrow(() -> new IllegalArgumentException("예측을 찾을 수 없습니다."));
 
         predictionRepository.delete(prediction);
+    }
+
+    public List<PredictionHistoryDto> getMyPredictions(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) throw new IllegalArgumentException("유저를 찾을 수 없습니다.");
+
+        return predictionRepository.findByUserIdOrderByPredictedAtDesc(user.getId())
+                .stream()
+                .map(p -> new PredictionHistoryDto(
+                        p.getId(),
+                        p.getMatch().getId(),
+                        p.getMatch().getLeague(),
+                        p.getMatch().getScheduledAt().toString(),
+                        p.getMatch().getHomeTeam().getName(),
+                        p.getMatch().getHomeTeam().getLogoUrl(),
+                        p.getMatch().getAwayTeam().getName(),
+                        p.getMatch().getAwayTeam().getLogoUrl(),
+                        p.getMatch().getHomeScore(),
+                        p.getMatch().getAwayScore(),
+                        p.getPredictedResult(),
+                        p.getIsCorrect(),
+                        p.getMatch().getStatus()
+                ))
+                .collect(Collectors.toList());
     }
 }
