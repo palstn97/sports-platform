@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import PredictionCard from '../../components/predictions/PredictionCard';
 import Header from '@/app/components/layout/Header';
 import Sidebar from '@/app/components/layout/Sidebar';
+import AiAnalysisCard from '@/app/components/analysis/AiAnalysisCard';
 
 interface TeamDto {
   id: number;
@@ -160,6 +161,7 @@ export default function MatchDetailPage() {
             awayTeam={match.awayTeam}
             status={match.status}
           />
+          <AiAnalysisCard matchId={match.id} />
         </div>
       </div>
     </div>
