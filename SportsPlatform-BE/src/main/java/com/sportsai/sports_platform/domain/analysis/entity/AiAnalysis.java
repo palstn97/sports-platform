@@ -1,15 +1,16 @@
-package com.sportsai.sports_platform.domain.analysis;
+package com.sportsai.sports_platform.domain.analysis.entity;
 
 import com.sportsai.sports_platform.domain.match.entity.Match;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "ai_analysis")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AiAnalysis {
 
     @Id
@@ -17,7 +18,7 @@ public class AiAnalysis {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "match_id", nullable = false)
+    @JoinColumn(name = "match_id", nullable = false, unique = true)
     private Match match;
 
     @Column(nullable = false, columnDefinition = "TEXT")
