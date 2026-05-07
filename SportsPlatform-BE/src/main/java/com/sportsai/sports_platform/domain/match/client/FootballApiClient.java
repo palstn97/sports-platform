@@ -60,4 +60,27 @@ public class FootballApiClient {
 
         return response.getBody();
     }
+
+    // 팀 최근 5경기 조회
+    public Map<String, Object> getTeamRecentMatches(Long teamExternalId) {
+        String url = apiUrl + "/teams/" + teamExternalId + "/matches"
+                + "?status=FINISHED&limit=5";
+
+        HttpEntity<Void> entity = new HttpEntity<>(createHeaders());
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, Map.class
+        );
+        return response.getBody();
+    }
+
+    // 팀 정보 + 선수단 조회
+    public Map<String, Object> getTeamInfo(Long teamExternalId) {
+        String url = apiUrl + "/teams/" + teamExternalId;
+
+        HttpEntity<Void> entity = new HttpEntity<>(createHeaders());
+        ResponseEntity<Map> response = restTemplate.exchange(
+                url, HttpMethod.GET, entity, Map.class
+        );
+        return response.getBody();
+    }
 }
