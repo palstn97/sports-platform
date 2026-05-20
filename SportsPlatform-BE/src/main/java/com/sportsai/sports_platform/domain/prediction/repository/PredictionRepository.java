@@ -1,5 +1,6 @@
 package com.sportsai.sports_platform.domain.prediction.repository;
 
+import com.sportsai.sports_platform.domain.prediction.dto.RankingDto;
 import com.sportsai.sports_platform.domain.prediction.entity.Prediction;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,5 +23,16 @@ public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
     // 유저의 예측 전체 조회
     List<Prediction> findByUserIdOrderByPredictedAtDesc(Long userId);
+
+    @Query("SELECT new com.sportsai.sports_platform.domain.prediction.dto.RankingDto(" +
+            "u.nickname, " +
+            "COUNT(p), " +
+            "SUM(CASE WHEN p.isCorrect = true THEN 1L ELSE 0L END), " +
+            "ROUND(SUM(CASE WHEN p.isCorrect = true THEN 1.0 ELSE 0.0 END) / COUNT(p) * 100, 1)) " +
+            "FROM Prediction p JOIN p.user u " +
+            "WHERE p.isCorrect IS NOT NULL " +
+            "GROUP BY u.id, u.nickname " +
+            "ORDER BY SUM(CASE WHEN p.isCorrect = true THEN 1L ELSE 0L END) DESC, COUNT(p) DESC")
+    List<RankingDto> findRanking();
 
 }
