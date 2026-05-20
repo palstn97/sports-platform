@@ -25,4 +25,12 @@ public class AiAnalysisController {
         aiAnalysisService.deleteAnalysis(matchId);
         return ResponseEntity.noContent().build();
     }
+
+    // 분석 결과 조회만 (없으면 404, GPT 호출 안 함)
+    @GetMapping("/{matchId}/result")
+    public ResponseEntity<AiAnalysisDto> getAnalysisResult(@PathVariable Long matchId) {
+        return aiAnalysisService.findAnalysis(matchId)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 }
