@@ -2,6 +2,7 @@ package com.sportsai.sports_platform.domain.prediction.controller;
 
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRatioDto;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRequestDto;
+import com.sportsai.sports_platform.domain.prediction.dto.RankingDto;
 import com.sportsai.sports_platform.domain.prediction.service.PredictionService;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionHistoryDto;
 import com.sportsai.sports_platform.common.security.JwtTokenProvider;
@@ -65,5 +66,10 @@ public class PredictionController {
         String token = request.getHeader("Authorization").replace("Bearer ", "");
         String email = jwtTokenProvider.getEmailFromToken(token);
         return ResponseEntity.ok(predictionService.getMyPredictions(email));
+    }
+
+    @GetMapping("/ranking")
+    public ResponseEntity<List<RankingDto>> getRanking() {
+        return ResponseEntity.ok(predictionService.getRanking());
     }
 }

@@ -5,6 +5,7 @@ import com.sportsai.sports_platform.domain.match.repository.MatchRepository;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionHistoryDto;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRatioDto;
 import com.sportsai.sports_platform.domain.prediction.dto.PredictionRequestDto;
+import com.sportsai.sports_platform.domain.prediction.dto.RankingDto;
 import com.sportsai.sports_platform.domain.prediction.entity.Prediction;
 import com.sportsai.sports_platform.domain.prediction.repository.PredictionRepository;
 import com.sportsai.sports_platform.domain.user.entity.User;
@@ -121,5 +122,9 @@ public class PredictionService {
                         p.getMatch().getStatus()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public List<RankingDto> getRanking() {
+        return predictionRepository.findRanking();
     }
 }
