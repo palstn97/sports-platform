@@ -78,15 +78,41 @@ function AiAnalysisModal({
   accessToken: string | null;
 }) {
   const [analysis, setAnalysis] = useState<string>('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [done, setDone] = useState(false);
+
+  // ✅ 모달 열릴 때 자동 조회
+  useEffect(() => {
+  const checkAnalysis = async () => {
+    console.log('accessToken:', accessToken); // 확인용
+    console.log('matchId:', match.id);
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/analysis/${match.id}/result`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
+      console.log('res.status:', res.status); // 확인용
+      if (res.ok) {
+        const data = await res.json();
+        setAnalysis(data.analysisText);
+        setDone(true);
+      }
+    } catch (err) {
+      console.error('분석 결과 조회 실패', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  checkAnalysis();
+}, [match.id]);
 
   const fetchAnalysis = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analysis/${match.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/analysis/${match.id}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
       const data = await res.json();
       setAnalysis(data.analysisText);
       setDone(true);
@@ -108,9 +134,10 @@ function AiAnalysisModal({
         method: 'DELETE',
         headers: { Authorization: `Bearer ${accessToken}` }
       });
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/analysis/${match.id}`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/analysis/${match.id}`,
+        { headers: { Authorization: `Bearer ${accessToken}` } }
+      );
       const data = await res.json();
       setAnalysis(data.analysisText);
       setDone(true);
@@ -202,8 +229,16 @@ function AiAnalysisModal({
             )}
           </div>
 
-          {/* 빈 상태 */}
-          {!analysis && !loading && (
+          {/* 로딩 */}
+          {loading && (
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <div className="w-8 h-8 border-2 border-[#1a56db] border-t-transparent rounded-full animate-spin" />
+              <span className="text-[13px] text-[#a0a8c0]">분석 결과 확인 중...</span>
+            </div>
+          )}
+
+          {/* 분석 없음 → 분석 시작 버튼 */}
+          {!loading && !done && (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <span className="text-[32px] mb-2">⚽</span>
               <p className="text-[13px] text-[#a0a8c0] mb-4">
@@ -218,16 +253,8 @@ function AiAnalysisModal({
             </div>
           )}
 
-          {/* 로딩 */}
-          {loading && (
-            <div className="flex flex-col items-center justify-center py-8 gap-3">
-              <div className="w-8 h-8 border-2 border-[#1a56db] border-t-transparent rounded-full animate-spin" />
-              <span className="text-[13px] text-[#a0a8c0]">AI가 분석 중입니다...</span>
-            </div>
-          )}
-
           {/* 분석 결과 */}
-          {analysis && !loading && (
+          {!loading && done && analysis && (
             <>
               <div className="bg-[#f8f9fc] rounded-xl p-4">
                 <p className="text-[13px] text-[#1a1f36] leading-relaxed whitespace-pre-wrap">
@@ -300,6 +327,9 @@ export default function AiAnalysisPage() {
           {/* 페이지 제목 */}
           <div className="flex items-center gap-2 mb-4">
             <span className="text-[18px] font-bold text-[#1a1f36]">AI 분석</span>
+            <span className="text-[11px] font-semibold text-[#1a56db] bg-[#f0f4ff] px-2 py-[2px] rounded-full">
+              GPT-4o mini
+            </span>
           </div>
 
           {/* 날짜 탭 */}
@@ -380,7 +410,7 @@ export default function AiAnalysisPage() {
 
                   return (
                     <button
-                      key={match.id}
+                      key={`${match.id}-${match.scheduledAt}`}
                       onClick={() => setSelectedMatch(match)}
                       className={`w-full bg-white border border-[#eef0f6] border-t-0 hover:bg-[#f7f8fc] transition-all cursor-pointer text-left
                         ${isLast ? 'rounded-b-xl' : ''}`}
@@ -431,7 +461,7 @@ export default function AiAnalysisPage() {
                         {/* AI 분석 버튼 힌트 */}
                         <div className="flex-shrink-0">
                           <span className="text-[11px] font-semibold text-[#1a56db] bg-[#f0f4ff] px-2 py-1 rounded-full">
-                            경기 분석
+                            🤖 분석
                           </span>
                         </div>
                       </div>
