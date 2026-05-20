@@ -34,17 +34,14 @@ public class AiAnalysisService {
 
     @Transactional
     public AiAnalysisDto getOrCreateAnalysis(Long matchId) {
-        // 이미 분석이 있으면 바로 반환 → API 호출 안 함
         Optional<AiAnalysis> existing = aiAnalysisRepository.findByMatchId(matchId);
         if (existing.isPresent()) {
             return AiAnalysisDto.from(existing.get());
         }
 
-        // 경기 정보 조회
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new IllegalArgumentException("경기를 찾을 수 없습니다."));
 
-        // 프롬프트 생성 → OpenAI API 호출 → 저장
         String prompt = buildPrompt(match);
         String analysisText = callOpenAiApi(prompt);
 
@@ -57,6 +54,11 @@ public class AiAnalysisService {
         return AiAnalysisDto.from(analysis);
     }
 
+    public Optional<AiAnalysisDto> findAnalysis(Long matchId) {
+        return aiAnalysisRepository.findByMatchId(matchId)
+                .map(AiAnalysisDto::from);
+    }
+
     @Transactional
     public void deleteAnalysis(Long matchId) {
         aiAnalysisRepository.findByMatchId(matchId)
@@ -65,7 +67,10 @@ public class AiAnalysisService {
 
     private String buildPrompt(Match match) {
         StringBuilder sb = new StringBuilder();
-        sb.append("당신은 축구 전문 분석가입니다. 다음 경기를 분석해주세요.\n\n");
+
+        sb.append("당신은 축구 데이터 분석 전문가입니다. 아래 제공된 데이터만을 사용하여 경기를 분석해주세요.\n");
+        sb.append("제공되지 않은 정보는 절대 추측하거나 추가하지 마세요.\n\n");
+
         sb.append("=== 경기 정보 ===\n");
         sb.append("리그: ").append(match.getLeague()).append("\n");
         sb.append("홈팀: ").append(match.getHomeTeam().getName()).append("\n");
@@ -95,7 +100,7 @@ public class AiAnalysisService {
         try {
             Map<String, Object> homeInfo = footballApiClient
                     .getTeamInfo(match.getHomeTeam().getExternalId());
-            sb.append("=== ").append(match.getHomeTeam().getName()).append(" 주요 선수 ===\n");
+            sb.append("=== ").append(match.getHomeTeam().getName()).append(" 선수단 ===\n");
             sb.append(formatSquad(homeInfo)).append("\n");
         } catch (Exception e) {
             log.warn("홈팀 선수단 조회 실패: {}", e.getMessage());
@@ -105,7 +110,7 @@ public class AiAnalysisService {
         try {
             Map<String, Object> awayInfo = footballApiClient
                     .getTeamInfo(match.getAwayTeam().getExternalId());
-            sb.append("=== ").append(match.getAwayTeam().getName()).append(" 주요 선수 ===\n");
+            sb.append("=== ").append(match.getAwayTeam().getName()).append(" 선수단 ===\n");
             sb.append(formatSquad(awayInfo)).append("\n");
         } catch (Exception e) {
             log.warn("원정팀 선수단 조회 실패: {}", e.getMessage());
@@ -123,12 +128,40 @@ public class AiAnalysisService {
             log.warn("리그 순위 조회 실패: {}", e.getMessage());
         }
 
-        sb.append("\n위 데이터를 바탕으로 다음을 분석해주세요:\n");
-        sb.append("1. 양 팀 최근 폼 분석 (최근 5경기 기반)\n");
-        sb.append("2. 주요 선수 및 전력 비교\n");
-        sb.append("3. 주요 관전 포인트\n");
-        sb.append("4. 예상 결과 및 이유\n\n");
-        sb.append("답변은 친근하고 전문적인 한국어로, 마크다운 없이 일반 텍스트로 작성해주세요. 500자 이내로 간결하게 작성해주세요.");
+        // 분석 지시사항
+        sb.append("\n=== 분석 지시사항 ===\n");
+        sb.append("위 데이터를 기반으로 아래 항목을 분석해주세요:\n\n");
+
+        sb.append("1. 최근 폼 분석\n");
+        sb.append("   - 제공된 최근 5경기 결과에서 승/무/패 횟수를 직접 계산하세요\n");
+        sb.append("   - 득점/실점 패턴을 분석하세요 (평균 득점, 평균 실점, 무실점 경기 수)\n");
+        sb.append("   - 최근 경기 흐름이 상승세인지 하락세인지 판단하세요\n\n");
+
+        sb.append("2. 전력 비교\n");
+        sb.append("   - 제공된 리그 순위와 승점을 기반으로 현재 시즌 전체 성적을 비교하세요\n");
+        sb.append("   - 두 팀의 순위 차이와 승점 차이를 언급하세요\n");
+        sb.append("   - 제공된 선수단 명단을 기반으로 포지션별 구성을 비교하세요\n\n");
+
+        sb.append("3. 득실 패턴 분석\n");
+        sb.append("   - 최근 5경기 총 득점과 실점을 계산해 공격력/수비력을 평가하세요\n");
+        sb.append("   - 다득점 경기와 무실점 경기 비율을 분석하세요\n");
+        sb.append("   - 두 팀의 공격/수비 스타일을 비교하세요\n\n");
+
+        sb.append("4. 리그 현황 및 동기부여\n");
+        sb.append("   - 현재 순위를 바탕으로 각 팀이 우승/유럽대항전/강등권 중 어떤 상황인지 분석하세요\n");
+        sb.append("   - 이번 경기가 각 팀에게 갖는 의미와 동기부여를 평가하세요\n\n");
+
+        sb.append("5. 예상 결과\n");
+        sb.append("   - 위 데이터에서 도출된 근거를 바탕으로 예상 결과를 제시하세요\n");
+        sb.append("   - 승리 가능성이 높은 팀과 그 이유를 설명하세요\n");
+        sb.append("   - 근거 없는 예측은 하지 마세요\n\n");
+
+        sb.append("=== 작성 규칙 ===\n");
+        sb.append("- 친근하고 전문적인 한국어로 작성\n");
+        sb.append("- 마크다운 없이 일반 텍스트로 작성\n");
+        sb.append("- 제공된 데이터에서 직접 계산/도출한 내용만 작성\n");
+        sb.append("- 불확실한 내용은 반드시 추측 표현 사용 ('~로 예상됩니다', '~가 우세해 보입니다')\n");
+        sb.append("- 700자 이내로 작성\n");
 
         return sb.toString();
     }
@@ -261,11 +294,5 @@ public class AiAnalysisService {
         }
 
         return "AI 분석을 불러오는 데 실패했습니다.";
-    }
-
-    // 분석 결과 조회만 (GPT 호출 안 함)
-    public Optional<AiAnalysisDto> findAnalysis(Long matchId) {
-        return aiAnalysisRepository.findByMatchId(matchId)
-                .map(AiAnalysisDto::from);
     }
 }
