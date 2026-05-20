@@ -262,4 +262,10 @@ public class AiAnalysisService {
 
         return "AI 분석을 불러오는 데 실패했습니다.";
     }
+
+    // 분석 결과 조회만 (GPT 호출 안 함)
+    public Optional<AiAnalysisDto> findAnalysis(Long matchId) {
+        return aiAnalysisRepository.findByMatchId(matchId)
+                .map(AiAnalysisDto::from);
+    }
 }
