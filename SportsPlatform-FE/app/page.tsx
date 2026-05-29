@@ -1,22 +1,21 @@
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
-import MatchList from './components/matches/MatchList';
+import TodayMatches from './components/home/TodayMatches';
+import MyPredictionStats from './components/home/MyPredictionStats';
+import RankingPreview from './components/home/RankingPreview';
+
 
 export default function Home() {
   return (
     <div className="bg-[#f4f6fb] min-h-screen">
-
-      {/* 헤더 */}
       <Header />
-
-      {/* 콘텐츠 */}
       <div className="max-w-[1280px] mx-auto px-10 py-6 flex gap-6">
-
-        {/* 사이드바 */}
         <Sidebar />
-
-        {/* 메인 콘텐츠 */}
-        <MatchList />
+        <div className="flex-1 flex flex-col gap-5">
+          <MyPredictionStats />
+          <TodayMatches />
+          <RankingPreview />
+        </div>
       </div>
     </div>
   );
