@@ -10,17 +10,11 @@ const navItems = [
   { label: '승부 예측', href: '/predictions', section: 'predict', color: '#8b5cf6' },
   { label: '예측 랭킹', href: '/ranking', section: 'predict', color: '#f59e0b' },
   { label: 'AI 분석', href: '/analysis', section: 'predict', color: '#1a56db' },
-  { label: '해외 축구', href: '/soccer', section: 'sports', color: '#16a34a' },
-  { label: 'MLB 야구', href: '/baseball', section: 'sports', color: '#f59e0b' },
-  { label: '뉴스 피드', href: '/news', section: 'community' },
-  { label: '자유 게시판', href: '/board', section: 'community' },
 ];
 
 const sectionLabels: Record<string, string> = {
   menu: '메뉴',
   predict: '예측',
-  sports: '종목',
-  community: '커뮤니티',
 };
 
 export default function Sidebar() {
